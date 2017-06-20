@@ -92,16 +92,16 @@ public class CurrencyFetchManager {
                     CurrencyEntity tmp = new CurrencyEntity();
                     try {
                         JSONObject tmpObj = (JSONObject) arr.get(i);
-                        tmp.name = tmpObj.getString("name");
+                        tmp.name = tmpObj.getString("code");
                         tmp.code = tmpObj.getString("code");
-                        tmp.rate = (float) tmpObj.getDouble("rate");
-                        String selectedISO = BRSharedPrefs.getIso(context);
+                        tmp.rate = (float) tmpObj.getDouble("n");
+                        String selectedISO = SharedPreferencesManager.getIso(context);
 //                        Log.e(TAG,"selectedISO: " + selectedISO);
                         if (tmp.code.equalsIgnoreCase(selectedISO)) {
 //                            Log.e(TAG, "theIso : " + theIso);
 //                                Log.e(TAG, "Putting the shit in the shared preffs");
-                            BRSharedPrefs.putIso(context, tmp.code);
-                            BRSharedPrefs.putCurrencyListPosition(context, i - 1);
+                            SharedPreferencesManager.putIso(context, tmp.code);
+                            SharedPreferencesManager.putCurrencyListPosition(context, i - 1);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -181,12 +181,12 @@ public class CurrencyFetchManager {
 
 
     public static JSONArray getJSonArray(Activity activity) {
-        String jsonString = callURL(activity, String.format("https://%s/rates", BreadApp.HOST));
+        String jsonString = callURL(activity, "https://litecoin.com/api/v1/ticker");
         JSONArray jsonArray = null;
         if (jsonString == null) return null;
         try {
             JSONObject obj = new JSONObject(jsonString);
-            jsonArray = obj.getJSONArray("body");
+            jsonArray = obj.getJSONArray("price");
 
         } catch (JSONException ignored) {
         }
@@ -206,7 +206,7 @@ public class CurrencyFetchManager {
 //            String secureDate = headers.getString("Date");
 //            @SuppressWarnings("deprecation") long date = Date.parse(secureDate) / 1000;
 
-//            BRSharedPrefs.putSecureTime(activity, date);
+//            SharedPreferencesManager.putSecureTime(activity, date);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -214,7 +214,7 @@ public class CurrencyFetchManager {
     }
 
     public static void updateFeePerKb(Activity activity) {
-        String jsonString = callURL(activity, "https://api.breadwallet.com/fee-per-kb");
+        String jsonString = callURL(activity, "https://prod.breadwallet.com/fee-per-kb");
         if (jsonString == null || jsonString.isEmpty()) {
             Log.e(TAG, "updateFeePerKb: failed to update fee, response string: " + jsonString);
             return;
@@ -225,7 +225,7 @@ public class CurrencyFetchManager {
             fee = obj.getLong("fee_per_kb");
             if (fee != 0 && fee < BRConstants.MAX_FEE_PER_KB) {
 
-                BRSharedPrefs.putFeePerKb(activity, fee);
+                SharedPreferencesManager.putFeePerKb(activity, fee);
                 BRWalletManager.getInstance().setFeePerKb(fee);
             }
         } catch (JSONException e) {
@@ -253,7 +253,7 @@ public class CurrencyFetchManager {
                 Log.e(TAG, "callURL: strDate == null!!!");
             } else {
                 @SuppressWarnings("deprecation") long date = Date.parse(strDate) / 1000;
-                BRSharedPrefs.putSecureTime(app, date);
+                SharedPreferencesManager.putSecureTime(app, date);
                 Assert.assertTrue(date != 0);
             }
 
